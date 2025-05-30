@@ -78,7 +78,7 @@ impl CPU {
     }
 
     pub fn run(&mut self, memory: &mut Memory) {
-        let instruction_byte: u8 = memory.read(self.state.pc);
+        let instruction_byte: u8 = memory.read_byte(self.state.pc);
         let instruction_option: Option<Instruction> = Instruction::from_byte(instruction_byte);
 
         if let Some(instruction) = instruction_option {

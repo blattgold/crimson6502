@@ -9,11 +9,11 @@ impl Memory {
         }
     }
 
-    pub fn read(&self, addr: u16) -> u8 {
+    pub fn read_byte(&self, addr: u16) -> u8 {
         self.data[addr as usize]
     }
 
-    pub fn write(&mut self, addr: u16, value: u8) {
+    pub fn write_byte(&mut self, addr: u16, value: u8) {
         self.data[addr as usize] = value;
     }
 }
