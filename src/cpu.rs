@@ -1,6 +1,7 @@
 use bitflags::bitflags;
 use crate::memory::Memory;
 use crate::instruction::{Instruction, Mnemonic, AddressingMode, IndexedBy};
+use crate::instruction_evaluation::{NOPEvaluation, InstructionResult};
 
 bitflags! {
     #[derive(Clone, Copy, Debug)]
@@ -30,28 +31,17 @@ pub struct CPUStats {
     total_cycles: usize,
     instructions: usize,
 }
-#[derive(Debug)]
-pub struct CPUExecutionResult {
-    state: CPUState,
-    cycles: u8,
-    bytes: u8,
-}
 
-#[derive(Debug)]
+
+#[derive(
+    Debug, 
+)]
 pub struct CPU {
     state: CPUState,
     stats: CPUStats,
 }
 
-impl CPUExecutionResult {
-    fn new(state: CPUState, cycles: u8, bytes: u8) -> CPUExecutionResult {
-        Self {
-            state: state,
-            cycles: cycles,
-            bytes: bytes,
-        }
-    }
-}
+
 
 impl CPUState {
     pub fn new() -> CPUState {
@@ -75,6 +65,8 @@ impl CPUStats {
     }
 }
 
+impl NOPEvaluation for CPU {}
+
 impl CPU {
     pub fn new(state: CPUState) -> CPU {
         Self {
@@ -92,7 +84,7 @@ impl CPU {
         let instruction_option: Option<Instruction> = Instruction::from_byte(instruction_byte);
 
         if let Some(instruction) = instruction_option {
-            let result: CPUExecutionResult = self.execute_instruction(instruction);
+            let result: InstructionResult = self.execute_instruction(instruction);
             println!("{:?}, {:?}", result.state, result.cycles);
             self.state = result.state;
             self.stats.total_cycles += result.cycles as usize;
@@ -101,20 +93,10 @@ impl CPU {
         }
     }
 
-    fn execute_instruction(&self, instruction: Instruction) -> CPUExecutionResult {
+    fn execute_instruction(&self, instruction: Instruction) -> InstructionResult {
         match instruction {
-            Instruction{mnemonic: Mnemonic::Nop, addressing_mode: AddressingMode::Implied} => self.execute_nop(instruction.addressing_mode),
-            _ => self.execute_nop(AddressingMode::Implied),
+            Instruction{mnemonic: Mnemonic::Nop, addressing_mode: AddressingMode::Implied} => CPU::evaluate_nop(&self.state),
+            _ => CPU::evaluate_nop(&self.state),
         }
-    }
-
-    fn execute_nop(&self, addressing_mode: AddressingMode) -> CPUExecutionResult {
-        CPUExecutionResult::new(
-            CPUState {
-                ..self.state
-            },
-            2u8,
-            1u8,
-        ) 
     }
 }
