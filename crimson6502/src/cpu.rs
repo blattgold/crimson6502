@@ -33,9 +33,7 @@ pub struct CPUStats {
 }
 
 
-#[derive(
-    Debug, 
-)]
+#[derive(Debug)]
 pub struct CPU {
     state: CPUState,
     stats: CPUStats,
@@ -85,7 +83,7 @@ impl CPU {
 
         if let Some(instruction) = instruction_option {
             let result: InstructionResult = self.execute_instruction(instruction);
-            println!("{:?}, {:?}", result.state, result.cycles);
+            println!("{:?}, {:?}, {:?}", result.state, result.cycles, result.bytes_read);
             self.state = result.state;
             self.stats.total_cycles += result.cycles as usize;
         } else {

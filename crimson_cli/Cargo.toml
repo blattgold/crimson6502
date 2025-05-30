@@ -1,0 +1,7 @@
+[package]
+name = "crimson_cli"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+crimson6502 = { path = "../crimson6502" }

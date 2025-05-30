@@ -14,3 +14,10 @@ version = "0.1.0"
 dependencies = [
  "bitflags",
 ]
+
+[[package]]
+name = "crimson_cli"
+version = "0.1.0"
+dependencies = [
+ "crimson6502",
+]
