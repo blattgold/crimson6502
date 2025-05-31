@@ -1,36 +1,30 @@
-use std::collections::HashMap;
-use crate::command::{Command, GrammarToken, CommandResult};
+use crate::command::CommandResult;
+use crate::command::Signal;
 
-pub struct CommandParser {
-    registered_commands: HashMap<String, Command>,
-}
+const ERR_ARG_COUNT_STR: &'static str = "Invalid number of arguments received for command: ";
+const ERR_INVALID_ARG_STR: &'static str = "Invalid argument received: ";
+const ERR_UNKNOWN_STR: &'static str = "Unknown command: ";
+
+pub struct CommandParser {}
 
 impl CommandParser {
-    pub fn new() -> CommandParser {
-        let mut parser: CommandParser = CommandParser {
-            registered_commands: HashMap::<String, Command>::new(),
-        };
-        parser.register_default_commands();
-        parser
-    }
-
-    pub fn register_command(&mut self, command: Command) {
-        self.registered_commands.insert(command.repr_str.clone(), command);
-    }
-
-    fn register_default_commands(&mut self) {
-        self.register_command(Command::new(
-            1,
-            String::from("quit"),
-            vec![GrammarToken::Command],
-            || CommandResult::SignalQuit,
-        ));
-    }
-
-    pub fn parse(&self, input_vec: &[String]) -> Option<Command> {
-        if input_vec.is_empty() {
-            return None;
+    pub fn parse(input_slice: &[String]) -> CommandResult {
+        if input_slice.is_empty() {
+            return CommandResult::None;
         }
-        self.registered_commands.get(&input_vec[0]).cloned()
+
+        match input_slice[0].as_str() {
+            "quit" => CommandResult::Signal(Signal::Quit),
+            "step" if input_slice.len() == 2 => {
+                if let Ok(num) = input_slice[1].parse::<isize>() {
+                    CommandResult::Signal(Signal::CPUStep(num))
+                } else {
+                    CommandResult::Message(String::from(ERR_INVALID_ARG_STR) + &input_slice[1])
+                }
+            },
+            "step" if input_slice.len() == 1 => CommandResult::Signal(Signal::CPUStep(1)),
+            "step" => CommandResult::Message(String::from(ERR_ARG_COUNT_STR) + "step"),
+            s => CommandResult::Message(String::from(ERR_UNKNOWN_STR) + s),
+        }
     }
 }
