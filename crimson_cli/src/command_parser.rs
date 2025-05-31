@@ -1,30 +1,36 @@
-use std::num::ParseIntError;
+use std::collections::HashMap;
+use crate::command::{Command, GrammarToken, CommandResult};
 
-use crate::command::Command;
-
-pub struct CommandParser;
+pub struct CommandParser {
+    registered_commands: HashMap<String, Command>,
+}
 
 impl CommandParser {
-    pub fn parse(input: String) -> Command {
-        let arguments: Vec<&str> = input.split_whitespace().collect();
-        match arguments[0].to_lowercase().as_str() {
-            "quit" => Command::Quit,
-            "step" => Self::parse_args_step(arguments),
-            other => Command::Unknown(String::from(other))
-        }
+    pub fn new() -> CommandParser {
+        let mut parser: CommandParser = CommandParser {
+            registered_commands: HashMap::<String, Command>::new(),
+        };
+        parser.register_default_commands();
+        parser
     }
 
-    fn parse_args_step(arguments: Vec<&str>) -> Command {
-        if arguments.len() == 1 {
-            return Command::Step(1)
-        } else {
-            let step_amount: Result<usize, ParseIntError> = arguments[1].parse();
+    pub fn register_command(&mut self, command: Command) {
+        self.registered_commands.insert(command.repr_str.clone(), command);
+    }
 
-            if let Ok(n) = step_amount {
-                return Command::Step(n);
-            } else {
-                return Command::InvalidArgs(String::from(arguments[1]))
-            }
+    fn register_default_commands(&mut self) {
+        self.register_command(Command::new(
+            1,
+            String::from("quit"),
+            vec![GrammarToken::Command],
+            || CommandResult::SignalQuit,
+        ));
+    }
+
+    pub fn parse(&self, input_vec: &[String]) -> Option<Command> {
+        if input_vec.is_empty() {
+            return None;
         }
+        self.registered_commands.get(&input_vec[0]).cloned()
     }
 }
