@@ -20,7 +20,7 @@ impl CLISession {
     }
 
     pub fn run(&mut self) {
-        loop {
+        while !self.quit {
             if let Some(input_vec) = self.prompt() {
                 let result: CommandResult = CommandParser::parse(&input_vec);
                 self.execute_result(result);
@@ -33,7 +33,7 @@ impl CLISession {
         io::stdout().flush().unwrap();
 
         let mut input: String = String::new();
-        if let Err(error) = io::stdin().read_line(&mut input) {
+        if let Err(_) = io::stdin().read_line(&mut input) {
             return None;
         }
         let input = input.trim().to_string();
@@ -51,7 +51,7 @@ impl CLISession {
 
     fn execute_result(&mut self, command_result: CommandResult) {
         match command_result {
-            CommandResult::None => return,
+            CommandResult::None => (),
             CommandResult::Message(message) => println!("{}", message),
             CommandResult::Signal(signal) => match signal {
                 Signal::Quit 
@@ -63,7 +63,16 @@ impl CLISession {
                 Signal::InitCPU
                     => self.cpu = Some(CPU::new(CPUState::new())),
                 Signal::InitMemory
-                    => self.memory = Some(Memory::new())
+                    => self.memory = Some(Memory::new()),
+                Signal::InitAll
+                    => {
+                        self.cpu = Some(CPU::new(CPUState::new()));
+                        self.memory = Some(Memory::new());
+                    },
+                Signal::WriteMemory(addr, value) if self.memory.is_some() 
+                    => self.memory.as_mut().unwrap().write_byte(addr, value),
+                Signal::WriteMemory(_, _)
+                    => println!("Cannot write to Memory, it has not been initialized.")
             }
         }
     }

@@ -1,7 +1,7 @@
 use bitflags::bitflags;
 use crate::memory::Memory;
 use crate::instruction::{Instruction, Mnemonic, AddressingMode};
-use crate::instruction_evaluation::{NOPEvaluation, InstructionResult};
+use crate::instruction_evaluation::{self, evaluate_lda, evaluate_nop, InstructionResult};
 
 bitflags! {
     #[derive(Clone, Copy, Debug)]
@@ -62,8 +62,6 @@ impl CPUStats {
     }
 }
 
-impl NOPEvaluation for CPU {}
-
 impl CPU {
     pub fn new(state: CPUState) -> CPU {
         Self {
@@ -81,19 +79,20 @@ impl CPU {
         let instruction_option: Option<Instruction> = Instruction::from_byte(instruction_byte);
 
         if let Some(instruction) = instruction_option {
-            let result: InstructionResult = self.execute_instruction(instruction);
+            let result: InstructionResult = self.execute_instruction(instruction, memory);
             println!("{:?}, {:?}, {:?}", result.state, result.cycles, result.bytes_read);
             self.state = result.state;
             self.stats.total_cycles += result.cycles as usize;
         } else {
-            println!("Couldn't execute instruction.");
+            panic!("Could not convert byte to instruction: {:?} at address {:?}.", instruction_byte, self.state.pc);
         }
     }
 
-    fn execute_instruction(&self, instruction: Instruction) -> InstructionResult {
-        match instruction {
-            Instruction{mnemonic: Mnemonic::Nop, addressing_mode: AddressingMode::Implied} => CPU::evaluate_nop(&self.state),
-            _ => CPU::evaluate_nop(&self.state),
+    fn execute_instruction(&self, instruction: Instruction, memory: &mut Memory) -> InstructionResult {
+        match instruction.mnemonic {
+            Mnemonic::NOP => evaluate_nop(&self.state),
+            Mnemonic::LDA => evaluate_lda(&self.state, instruction.addressing_mode, memory),
+            _ => panic!("unimplemented instruction: {:?}", instruction),
         }
     }
 }

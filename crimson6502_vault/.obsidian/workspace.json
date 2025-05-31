@@ -1,0 +1,209 @@
+{
+  "main": {
+    "id": "3181065626ab6c9d",
+    "type": "split",
+    "children": [
+      {
+        "id": "0f2ca286c80d4229",
+        "type": "tabs",
+        "dimension": 90.39846375420068,
+        "children": [
+          {
+            "id": "4eabde1e779b6c41",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "completion/Transfer Instructions.md",
+                "mode": "preview",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Transfer Instructions"
+            }
+          }
+        ]
+      },
+      {
+        "id": "31f56b6f222e7847",
+        "type": "tabs",
+        "dimension": 9.601536245799327,
+        "children": [
+          {
+            "id": "1781936d09cac4b1",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "b3a024719a118cb5",
+    "type": "split",
+    "children": [
+      {
+        "id": "2e691ceb807bb2f0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "35f60f4ebff24b43",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "bbdfa6c699757ec1",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "ff4791d483818e57",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "8bc9798b6209e8c3",
+    "type": "split",
+    "children": [
+      {
+        "id": "05c9b2d67085434e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c58a7a531792c72d",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "completion/Transfer Instructions.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Transfer Instructions"
+            }
+          },
+          {
+            "id": "0cd8d26cf2f988f3",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "completion/Transfer Instructions.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Transfer Instructions"
+            }
+          },
+          {
+            "id": "6e2c4896f1aa6fbb",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "04a5bfc0d9c6c937",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "completion/Transfer Instructions.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Transfer Instructions"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "4eabde1e779b6c41",
+  "lastOpenFiles": [
+    "completion/Decrements & Increments.md",
+    "completion/Flag Instructions.md",
+    "completion/Interrupts.md",
+    "completion/Transfer Instructions.md",
+    "completion/Logical Operations.md",
+    "completion/Stack Instructions.md",
+    "completion/Other.md",
+    "Opcode Matrix.md",
+    "completion/Shift & Rotate Instructions.md",
+    "completion/Jumps & Subroutines.md",
+    "completion/Conditional Branch Instructions.md",
+    "completion/Comparisons.md",
+    "completion/Arithmetic Operations.md",
+    "sources.md",
+    "Welcome.md",
+    "completion",
+    "create a link.md"
+  ]
+}

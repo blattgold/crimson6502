@@ -1,21 +1,20 @@
-const LENGTH_IMPLIED: u8 = 1u8;
-const LENGTH_IMMEDIATE: u8 = 2u8;
-const LENGTH_ZEROPAGE: u8 = 2u8;
-const LENGTH_ABSOLUTE: u8 = 3u8;
-const LENGTH_INDIRECT: u8 = 3u8;
+use crate::Memory;
+use crate::CPUState;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum IndexedBy {
     None,
     X,
     Y,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum Mnemonic {
-    Nop,
+    NOP,
+    LDA,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum AddressingMode {
     Implied,
     Immediate,
@@ -24,14 +23,25 @@ pub enum AddressingMode {
     Indirect(IndexedBy),
 }
 
+pub enum MemoryReadResult {
+    Err,
+    u8(u8),
+    u16(u16),
+}
+
+pub enum MemoryWriteValue {
+    u8(u8),
+    u16(u16),
+}
+
 impl AddressingMode {
     pub fn instruction_length(&self) -> u8 {
         match self {
-            AddressingMode::Implied => LENGTH_IMPLIED,
-            AddressingMode::Immediate => LENGTH_IMMEDIATE,
-            AddressingMode::ZeroPage(_) => LENGTH_ZEROPAGE,
-            AddressingMode::Absolute(_) => LENGTH_ABSOLUTE,
-            AddressingMode::Indirect(_) => LENGTH_INDIRECT,
+            AddressingMode::Implied => 1u8,
+            AddressingMode::Immediate => 2u8,
+            AddressingMode::ZeroPage(_) => 2u8,
+            AddressingMode::Absolute(_) => 3u8,
+            AddressingMode::Indirect(_) => 3u8,
         }
     }
 
@@ -43,8 +53,24 @@ impl AddressingMode {
             AddressingMode::Indirect(IndexedBy::Y)
         )
     }
+
+    pub fn read_from_memory(&self, memory: &Memory, addr: u16) -> MemoryReadResult {
+        match self {
+            AddressingMode::Immediate => MemoryReadResult::u8(memory.read_byte(addr)),
+            _ => MemoryReadResult::Err,
+        }
+    }
+
+    pub fn write_to_memory(&self, memory: &mut Memory, addr: u16, value: MemoryWriteValue) {
+        match (self, value)  {
+            (AddressingMode::Immediate, MemoryWriteValue::u8(value)) 
+                => memory.write_byte(addr, value),
+            _ => (),
+        }
+    }
 }
 
+#[derive(Debug)]
 pub struct Instruction {
     pub mnemonic: Mnemonic, 
     pub addressing_mode: AddressingMode,
@@ -59,7 +85,8 @@ impl Instruction {
     }
     pub fn from_byte(byte: u8) -> Option<Self> {
         match byte {
-            0x00 => Some(Self::new(Mnemonic::Nop, AddressingMode::Implied)),
+            0xA9 => Some(Self::new(Mnemonic::LDA, AddressingMode::Immediate)),
+            0xEA => Some(Self::new(Mnemonic::NOP, AddressingMode::Implied)),
             _ => None,
         }
     }

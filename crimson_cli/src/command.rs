@@ -10,5 +10,7 @@ pub enum Signal {
     Quit,
     InitCPU,
     InitMemory,
+    InitAll,
     CPUStep(isize),
+    WriteMemory(u16, u8),
 }
