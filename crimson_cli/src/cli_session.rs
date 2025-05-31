@@ -1,6 +1,6 @@
 use std::io;
 use std::io::{Write};
-use crimson6502::{CPU, Memory};
+use crimson6502::{CPU, Memory, CPUState};
 use crate::command::{CommandResult, Signal};
 use crate::command_parser::CommandParser;
 
@@ -9,8 +9,6 @@ pub struct CLISession {
     cpu: Option<CPU>,
     memory: Option<Memory>,
 }
-
-
 
 impl CLISession {
     pub fn new() -> CLISession {
@@ -56,26 +54,31 @@ impl CLISession {
             CommandResult::None => return,
             CommandResult::Message(message) => println!("{}", message),
             CommandResult::Signal(signal) => match signal {
-                Signal::None => return,
-                Signal::Quit => self.quit = true,
-                Signal::CPUStep(n) => self.execute_cpu_step(n),
+                Signal::Quit 
+                    => self.quit = true,
+                Signal::CPUStep(n) if self.cpu_ready() 
+                    => self.execute_cpu_step(n),
+                Signal::CPUStep(_) 
+                    => println!("CPU and/or Memory have not been initialized."),
+                Signal::InitCPU
+                    => self.cpu = Some(CPU::new(CPUState::new())),
+                Signal::InitMemory
+                    => self.memory = Some(Memory::new())
             }
         }
     }
 
     fn execute_cpu_step(&mut self, n: isize) {
-        if self.cpu_ready() {
-            for _ in 0..n {
-                self.cpu
+        for _ in 0..n {
+            self.cpu
+                .as_mut()
+                .unwrap()
+                .run(
+                    self
+                    .memory
                     .as_mut()
                     .unwrap()
-                    .run(
-                        self
-                        .memory
-                        .as_mut()
-                        .unwrap()
-                    );
-            }
+                );
         }
     }
 

@@ -8,6 +8,7 @@ pub enum CommandResult {
 #[derive(Clone, Copy)]
 pub enum Signal {
     Quit,
+    InitCPU,
+    InitMemory,
     CPUStep(isize),
-    None,
 }

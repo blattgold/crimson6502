@@ -15,6 +15,14 @@ impl CommandParser {
 
         match input_slice[0].as_str() {
             "quit" => CommandResult::Signal(Signal::Quit),
+            "init" if input_slice.len() == 2 => {
+                match input_slice[1].as_str() {
+                    "cpu" => CommandResult::Signal(Signal::InitCPU),
+                    "memory" => CommandResult::Signal(Signal::InitMemory),
+                    s => CommandResult::Message(String::from(ERR_INVALID_ARG_STR) + s)
+                }
+            } 
+            "init" => CommandResult::Message(String::from(ERR_ARG_COUNT_STR) + "init"),
             "step" if input_slice.len() == 2 => {
                 if let Ok(num) = input_slice[1].parse::<isize>() {
                     CommandResult::Signal(Signal::CPUStep(num))

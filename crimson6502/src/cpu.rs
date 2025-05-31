@@ -1,6 +1,6 @@
 use bitflags::bitflags;
 use crate::memory::Memory;
-use crate::instruction::{Instruction, Mnemonic, AddressingMode, IndexedBy};
+use crate::instruction::{Instruction, Mnemonic, AddressingMode};
 use crate::instruction_evaluation::{NOPEvaluation, InstructionResult};
 
 bitflags! {
@@ -16,14 +16,14 @@ bitflags! {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct CPUState {
-    a: u8,
-    x: u8,
-    y: u8,
-    s: u8,
-    pc: u16,
-    flags: CPUFlags,
+    pub a: u8,
+    pub x: u8,
+    pub y: u8,
+    pub s: u8,
+    pub pc: u16,
+    pub flags: CPUFlags,
 }
 
 #[derive(Debug)]
@@ -38,7 +38,6 @@ pub struct CPU {
     state: CPUState,
     stats: CPUStats,
 }
-
 
 
 impl CPUState {
