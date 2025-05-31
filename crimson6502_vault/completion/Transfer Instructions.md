@@ -10,7 +10,7 @@ Load accumulator with memory (A = M)
   - Fetch operand, load into A, update N/Z.  
   - Handle zero‐page indexing wrap for zeropage,X.  
 - Addressing modes & typical cycles:  
-  - [ ] immediate — 2 cycles  
+  - [x] immediate — 2 cycles  
   - [ ] zeropage — 3 cycles  
   - [ ] zeropage,X — 4 cycles  
   - [ ] absolute — 4 cycles  
