@@ -11,11 +11,11 @@ Load accumulator with memory (A = M)
   - Handle zero‐page indexing wrap for zeropage,X.  
 - Addressing modes & typical cycles:  
   - [x] immediate — 2 cycles  
-  - [ ] zeropage — 3 cycles  
-  - [ ] zeropage,X — 4 cycles  
-  - [ ] absolute — 4 cycles  
-  - [ ] absolute,X — 4 cycles + 1 if page boundary crossed  
-  - [ ] absolute,Y — 4 cycles + 1 if page boundary crossed  
+  - [x] zeropage — 3 cycles  
+  - [x] zeropage,X — 4 cycles  
+  - [x] absolute — 4 cycles  
+  - [x] absolute,X — 4 cycles + 1 if page boundary crossed  
+  - [x] absolute,Y — 4 cycles + 1 if page boundary crossed  
   - [ ] (indirect,X) — 6 cycles  
   - [ ] (indirect),Y — 5 cycles + 1 if page boundary crossed  
 
