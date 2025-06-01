@@ -15,6 +15,8 @@ Crimson6502 is a work-in-progress 6502 emulator written in Rust.
 - write \<addr> \<value> - Write a byte to memory at the specified address
 - step - Execute 1 instruction cycle
 - step \<n> - Execute n instruction cycles
+- file open \<filename> - Opens file relative to working directory (appends .txt)
+- file run - misnomer but whatever, it puts file contents into memory starting at address 0
 
 ### Opcode Coverage
 
