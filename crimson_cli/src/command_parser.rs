@@ -44,6 +44,22 @@ impl CommandParser {
             },
             "write" => CommandResult::Message(String::from(ERR_ARG_COUNT_STR) + "write"),
             //----------------------------------------------------------------------------------------------
+            "file" if input_slice.len() == 3 => {
+                if input_slice[1].as_str() == "open" {
+                    CommandResult::Signal(Signal::FileOpen(input_slice[2].clone()))
+                } else {
+                    CommandResult::Message(String::from(ERR_INVALID_ARG_STR) + &input_slice[1])
+                }
+            },
+            "file" if input_slice.len() == 2 => {
+                if input_slice[1].as_str() == "run" {
+                    CommandResult::Signal(Signal::FileRun)
+                } else {
+                    CommandResult::Message(String::from(ERR_INVALID_ARG_STR) + &input_slice[1])
+                }
+            },
+            "file" => CommandResult::Message(String::from(ERR_ARG_COUNT_STR) + "file"),
+            //----------------------------------------------------------------------------------------------
             s => CommandResult::Message(String::from(ERR_UNKNOWN_STR) + s),
         }
     }

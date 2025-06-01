@@ -148,6 +148,7 @@ impl Instruction {
             0x8C => Some(Self::new(Mnemonic::STY, AddressingMode::Absolute(IndexedBy::None))),
             //NOP-----------------------------------------------------------------------------------
             0xEA => Some(Self::new(Mnemonic::NOP, AddressingMode::Implied)),
+            //--------------------------------------------------------------------------------------
             _ => None,
         }
     }

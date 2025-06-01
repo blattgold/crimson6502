@@ -5,7 +5,7 @@ pub enum CommandResult {
     None,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub enum Signal {
     Quit,
     InitCPU,
@@ -13,4 +13,6 @@ pub enum Signal {
     InitAll,
     CPUStep(isize),
     WriteMemory(u16, u8),
+    FileOpen(String),
+    FileRun,
 }

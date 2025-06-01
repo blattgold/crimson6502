@@ -53,7 +53,7 @@ pub fn evaluate_load(state: &CPUState, memory: &Memory, mnemonic: Mnemonic, addr
 
 pub fn evaluate_store(state: &CPUState, memory: &mut Memory, mnemonic: Mnemonic, addressing_mode: AddressingMode) -> InstructionResult {
     match mnemonic {
-        Mnemonic::STA => addressing_mode.write_value(state.y, state, memory),
+        Mnemonic::STA => addressing_mode.write_value(state.a, state, memory),
         Mnemonic::STX => addressing_mode.write_value(state.x, state, memory),
         Mnemonic::STY => addressing_mode.write_value(state.y, state, memory),
         _ => panic!("evaluate_store received invalid mnemonic: {:?}", mnemonic),
