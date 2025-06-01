@@ -24,6 +24,9 @@ pub enum Mnemonic {
     LDA,
     LDX,
     LDY,
+    STA,
+    STX,
+    STY
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -46,18 +49,14 @@ impl AddressingMode {
         }
     }
 
-    pub fn can_cross_page(&self) -> bool {
-        matches!(
-            self,
-            AddressingMode::Absolute(IndexedBy::X) |
-            AddressingMode::Absolute(IndexedBy::Y) |
-            AddressingMode::Indirect(IndexedBy::Y)
-        )
-    }
-
     pub fn get_operand(&self, state: &CPUState, memory: &Memory) -> (u8, bool) {
         let (addr, page_crossed) = self.effective_operand_address(state, memory);
         (memory.read_byte(addr), page_crossed)
+    }
+
+    pub fn write_value(&self, value: u8, state: &CPUState, memory: &mut Memory) {
+        let (addr, _) = self.effective_operand_address(state, memory);
+        memory.write_byte(addr, value);
     }
 
     fn effective_operand_address(&self, state: &CPUState, memory: &Memory) -> (u16, bool) {
@@ -131,6 +130,22 @@ impl Instruction {
             0xB4 => Some(Self::new(Mnemonic::LDY, AddressingMode::ZeroPage(IndexedBy::X))),
             0xAC => Some(Self::new(Mnemonic::LDY, AddressingMode::Absolute(IndexedBy::None))),
             0xBC => Some(Self::new(Mnemonic::LDY, AddressingMode::Absolute(IndexedBy::X))),
+            //STA-----------------------------------------------------------------------------------
+            0x85 => Some(Self::new(Mnemonic::STA, AddressingMode::ZeroPage(IndexedBy::None))),
+            0x95 => Some(Self::new(Mnemonic::STA, AddressingMode::ZeroPage(IndexedBy::X))),
+            0x8D => Some(Self::new(Mnemonic::STA, AddressingMode::Absolute(IndexedBy::None))),
+            0x9D => Some(Self::new(Mnemonic::STA, AddressingMode::Absolute(IndexedBy::X))),
+            0x99 => Some(Self::new(Mnemonic::STA, AddressingMode::Absolute(IndexedBy::Y))),
+            0x81 => Some(Self::new(Mnemonic::STA, AddressingMode::Indirect(IndexedBy::X))),
+            0x91 => Some(Self::new(Mnemonic::STA, AddressingMode::Indirect(IndexedBy::Y))),
+            //STX-----------------------------------------------------------------------------------
+            0x86 => Some(Self::new(Mnemonic::STX, AddressingMode::ZeroPage(IndexedBy::None))),
+            0x96 => Some(Self::new(Mnemonic::STX, AddressingMode::ZeroPage(IndexedBy::X))),
+            0x8E => Some(Self::new(Mnemonic::STX, AddressingMode::Absolute(IndexedBy::None))),
+            //STY-----------------------------------------------------------------------------------
+            0x84 => Some(Self::new(Mnemonic::STY, AddressingMode::ZeroPage(IndexedBy::None))),
+            0x94 => Some(Self::new(Mnemonic::STY, AddressingMode::ZeroPage(IndexedBy::X))),
+            0x8C => Some(Self::new(Mnemonic::STY, AddressingMode::Absolute(IndexedBy::None))),
             //NOP-----------------------------------------------------------------------------------
             0xEA => Some(Self::new(Mnemonic::NOP, AddressingMode::Implied)),
             _ => None,

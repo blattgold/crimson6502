@@ -58,13 +58,13 @@ Store accumulator to memory (M = A)
   - Compute effective address, write A to memory.  
   - No read‐modify or flag updates.  
 - Addressing modes & typical cycles:  
-  - [ ] zeropage — 3 cycles  
-  - [ ] zeropage,X — 4 cycles  
-  - [ ] absolute — 4 cycles  
-  - [ ] absolute,X — 5 cycles  
-  - [ ] absolute,Y — 5 cycles  
-  - [ ] (indirect,X) — 6 cycles  
-  - [ ] (indirect),Y — 6 cycles  
+  - [x] zeropage — 3 cycles  
+  - [x] zeropage,X — 4 cycles  
+  - [x] absolute — 4 cycles  
+  - [x] absolute,X — 5 cycles  
+  - [x] absolute,Y — 5 cycles  
+  - [x] (indirect,X) — 6 cycles  
+  - [x] (indirect),Y — 6 cycles  
 
 ### STX  
 Store X register to memory (M = X)  
@@ -72,9 +72,9 @@ Store X register to memory (M = X)
 - Implementation notes:  
   - Compute effective address, write X to memory.  
 - Addressing modes & typical cycles:  
-  - [ ] zeropage — 3 cycles  
-  - [ ] zeropage,Y — 4 cycles  
-  - [ ] absolute — 4 cycles  
+  - [x] zeropage — 3 cycles  
+  - [x] zeropage,Y — 4 cycles  
+  - [x] absolute — 4 cycles  
 
 ### STY  
 Store Y register to memory (M = Y)  
@@ -82,9 +82,9 @@ Store Y register to memory (M = Y)
 - Implementation notes:  
   - Compute effective address, write Y to memory.  
 - Addressing modes & typical cycles:  
-  - [ ] zeropage — 3 cycles  
-  - [ ] zeropage,X — 4 cycles  
-  - [ ] absolute — 4 cycles  
+  - [x] zeropage — 3 cycles  
+  - [x] zeropage,X — 4 cycles  
+  - [x] absolute — 4 cycles  
 
 ### TAX  
 Transfer accumulator to X register (X = A)  

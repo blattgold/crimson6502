@@ -1,7 +1,7 @@
 use bitflags::bitflags;
 use crate::memory::Memory;
-use crate::instruction::{Instruction, Mnemonic, AddressingMode};
-use crate::instruction_evaluation::{self, evaluate_transfer, evaluate_nop, InstructionResult};
+use crate::instruction::{Instruction, Mnemonic};
+use crate::instruction_evaluation::{evaluate_load, evaluate_nop, evaluate_store, InstructionResult};
 
 bitflags! {
     #[derive(Clone, Copy, Debug)]
@@ -83,6 +83,7 @@ impl CPU {
             println!("{:?}, cycles: {:?}, instruction length: {:?}", result.state, result.cycles, result.instruction_length);
             self.state = result.state;
             self.stats.total_cycles += result.cycles as usize;
+            self.stats.instructions += 1;
         } else {
             panic!("Could not convert byte to instruction: {:?} at address {:?}.", instruction_byte, self.state.pc);
         }
@@ -91,8 +92,8 @@ impl CPU {
     fn execute_instruction(&self, instruction: Instruction, memory: &mut Memory) -> InstructionResult {
         match instruction.mnemonic {
             Mnemonic::NOP => evaluate_nop(&self.state),
-            Mnemonic::LDA | Mnemonic::LDX | Mnemonic::LDY => evaluate_transfer(&self.state, memory, instruction.mnemonic, instruction.addressing_mode),
-            _ => panic!("unimplemented instruction: {:?}", instruction),
+            Mnemonic::LDA | Mnemonic::LDX | Mnemonic::LDY => evaluate_load(&self.state, memory, instruction.mnemonic, instruction.addressing_mode),
+            Mnemonic::STA | Mnemonic::STX | Mnemonic::STY => evaluate_store(&self.state, memory, instruction.mnemonic, instruction.addressing_mode),
         }
     }
 }

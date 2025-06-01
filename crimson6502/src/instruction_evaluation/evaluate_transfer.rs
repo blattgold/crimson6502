@@ -27,7 +27,7 @@ fn set_flags_transfer(value: u8, flags: &mut CPUFlags) {
     }
 }
 
-pub fn evaluate_transfer(state: &CPUState, memory: &Memory, mnemonic: Mnemonic, addressing_mode: AddressingMode) -> InstructionResult {
+pub fn evaluate_load(state: &CPUState, memory: &Memory, mnemonic: Mnemonic, addressing_mode: AddressingMode) -> InstructionResult {
     let (value, page_crossed)= addressing_mode.get_operand(state, memory);
 
     let mut result = InstructionResult::new(
@@ -49,4 +49,22 @@ pub fn evaluate_transfer(state: &CPUState, memory: &Memory, mnemonic: Mnemonic, 
     };
 
     result
+}
+
+pub fn evaluate_store(state: &CPUState, memory: &mut Memory, mnemonic: Mnemonic, addressing_mode: AddressingMode) -> InstructionResult {
+    match mnemonic {
+        Mnemonic::STA => addressing_mode.write_value(state.y, state, memory),
+        Mnemonic::STX => addressing_mode.write_value(state.x, state, memory),
+        Mnemonic::STY => addressing_mode.write_value(state.y, state, memory),
+        _ => panic!("evaluate_store received invalid mnemonic: {:?}", mnemonic),
+    };
+
+    InstructionResult::new(
+        CPUState {
+            pc: state.pc.wrapping_add((addressing_mode.instruction_length() + 1) as u16),
+            ..*state
+        },
+        cycles_transfer(addressing_mode, true),
+        addressing_mode.instruction_length(),
+    )
 }
