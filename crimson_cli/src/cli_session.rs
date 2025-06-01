@@ -1,6 +1,7 @@
 use std::io;
 use std::io::{Write, Read};
 use std::fs;
+use std::time::Instant;
 use crimson6502::{CPU, Memory, CPUState};
 use crate::command::{CommandResult, Signal};
 use crate::command_parser::CommandParser;
@@ -82,7 +83,11 @@ impl CLISession {
                 Signal::Quit 
                     => self.quit = true,
                 Signal::CPUStep(n) if self.cpu_ready() 
-                    => self.execute_cpu_step(n),
+                    => {
+                        let now = Instant::now();
+                        self.execute_cpu_step(n);
+                        println!("Elapsed: {:?}", now.elapsed());
+                    },
                 Signal::CPUStep(_) 
                     => println!("CPU and/or Memory have not been initialized."),
                 Signal::InitCPU

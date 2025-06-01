@@ -75,20 +75,23 @@ impl AddressingMode {
                 page_crossed = (addr & 0xFF00) != (effective_addr & 0xFF00);
                 effective_addr
             },
-            AddressingMode::Indirect(indexed_by) if *indexed_by == IndexedBy::X => {
-                let indirect_addr: u8 = memory.read_byte(pc_next).wrapping_add(indexed_by.from_state(state));
-                let (addr_lo, addr_hi) = (memory.read_byte(indirect_addr as u16), memory.read_byte(indirect_addr.wrapping_add(1) as u16));
-                let effective_addr: u16 = ((addr_hi as u16) << 8) | (addr_lo as u16);
-                effective_addr
+            AddressingMode::Indirect(indexed_by) => {
+                if *indexed_by == IndexedBy::X {
+                    let indirect_addr: u8 = memory.read_byte(pc_next).wrapping_add(indexed_by.from_state(state));
+                    let (addr_lo, addr_hi) = (memory.read_byte(indirect_addr as u16), memory.read_byte(indirect_addr.wrapping_add(1) as u16));
+                    let effective_addr: u16 = ((addr_hi as u16) << 8) | (addr_lo as u16);
+                    effective_addr
+                } else if *indexed_by == IndexedBy::Y {
+                    let indirect_addr: u8 = memory.read_byte(pc_next);
+                    let (addr_lo, addr_hi) = (memory.read_byte(indirect_addr as u16), memory.read_byte(indirect_addr.wrapping_add(1) as u16));
+                    let addr: u16 = ((addr_hi as u16) << 8) | (addr_lo as u16);
+                    let effective_addr: u16 = addr.wrapping_add(indexed_by.from_state(state) as u16);
+                    page_crossed = (addr & 0xFF00) != (effective_addr & 0xFF00);
+                    effective_addr
+                } else {
+                    panic!();
+                }
             },
-            AddressingMode::Indirect(indexed_by) if *indexed_by == IndexedBy::Y => {
-                let indirect_addr: u8 = memory.read_byte(pc_next);
-                let (addr_lo, addr_hi) = (memory.read_byte(indirect_addr as u16), memory.read_byte(indirect_addr.wrapping_add(1) as u16));
-                let addr: u16 = ((addr_hi as u16) << 8) | (addr_lo as u16);
-                let effective_addr: u16 = addr.wrapping_add(indexed_by.from_state(state) as u16);
-                page_crossed = (addr & 0xFF00) != (effective_addr & 0xFF00);
-                effective_addr
-            }
             _ => panic!("unimplemented AddressingMode handling for: {:?}", self),
         }, page_crossed)
     }
