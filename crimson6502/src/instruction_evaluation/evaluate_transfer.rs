@@ -1,7 +1,7 @@
 use crate::instruction_evaluation::types::InstructionResult;
 use crate::instruction::{AddressingMode, IndexedBy, Mnemonic};
 use crate::cpu::CPUState;
-use crate::Memory;
+use crate::{CPUFlags, Memory};
 
 fn cycles_transfer(addressing_mode: AddressingMode, page_crossed: bool) -> u8 {
     match addressing_mode {
@@ -18,8 +18,16 @@ fn cycles_transfer(addressing_mode: AddressingMode, page_crossed: bool) -> u8 {
     }
 }
 
+fn set_flags_transfer(value: u8, flags: &mut CPUFlags) {
+    if value == 0 {
+        flags.insert(CPUFlags::Z);
+    }
+    if value & 0x80 != 0 {
+        flags.insert(CPUFlags::N);
+    }
+}
+
 pub fn evaluate_transfer(state: &CPUState, memory: &Memory, mnemonic: Mnemonic, addressing_mode: AddressingMode) -> InstructionResult {
-    // TODO flags
     let (value, page_crossed)= addressing_mode.get_operand(state, memory);
 
     let mut result = InstructionResult::new(
@@ -30,6 +38,8 @@ pub fn evaluate_transfer(state: &CPUState, memory: &Memory, mnemonic: Mnemonic, 
         cycles_transfer(addressing_mode, page_crossed),
         addressing_mode.instruction_length(),
     );
+
+    set_flags_transfer(value, &mut result.state.flags);
 
     match mnemonic {
         Mnemonic::LDA => result.state.a = value,

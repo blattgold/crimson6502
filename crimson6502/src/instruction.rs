@@ -119,6 +119,18 @@ impl Instruction {
             0xB9 => Some(Self::new(Mnemonic::LDA, AddressingMode::Absolute(IndexedBy::Y))),
             0xA1 => Some(Self::new(Mnemonic::LDA, AddressingMode::Indirect(IndexedBy::X))),
             0xB1 => Some(Self::new(Mnemonic::LDA, AddressingMode::Indirect(IndexedBy::Y))),
+            //LDX-----------------------------------------------------------------------------------
+            0xA2 => Some(Self::new(Mnemonic::LDX, AddressingMode::Immediate)),
+            0xA6 => Some(Self::new(Mnemonic::LDX, AddressingMode::ZeroPage(IndexedBy::None))),
+            0xB6 => Some(Self::new(Mnemonic::LDX, AddressingMode::ZeroPage(IndexedBy::Y))),
+            0xAE => Some(Self::new(Mnemonic::LDX, AddressingMode::Absolute(IndexedBy::None))),
+            0xBE => Some(Self::new(Mnemonic::LDX, AddressingMode::Absolute(IndexedBy::Y))),
+            //LDY-----------------------------------------------------------------------------------
+            0xA0 => Some(Self::new(Mnemonic::LDY, AddressingMode::Immediate)),
+            0xA4 => Some(Self::new(Mnemonic::LDY, AddressingMode::ZeroPage(IndexedBy::None))),
+            0xB4 => Some(Self::new(Mnemonic::LDY, AddressingMode::ZeroPage(IndexedBy::X))),
+            0xAC => Some(Self::new(Mnemonic::LDY, AddressingMode::Absolute(IndexedBy::None))),
+            0xBC => Some(Self::new(Mnemonic::LDY, AddressingMode::Absolute(IndexedBy::X))),
             //NOP-----------------------------------------------------------------------------------
             0xEA => Some(Self::new(Mnemonic::NOP, AddressingMode::Implied)),
             _ => None,
