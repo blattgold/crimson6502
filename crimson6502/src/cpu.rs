@@ -1,7 +1,7 @@
 use bitflags::bitflags;
 use crate::memory::Memory;
 use crate::instruction::{Instruction, Mnemonic, AddressingMode};
-use crate::instruction_evaluation::{self, evaluate_lda, evaluate_nop, InstructionResult};
+use crate::instruction_evaluation::{self, evaluate_transfer, evaluate_nop, InstructionResult};
 
 bitflags! {
     #[derive(Clone, Copy, Debug)]
@@ -80,7 +80,7 @@ impl CPU {
 
         if let Some(instruction) = instruction_option {
             let result: InstructionResult = self.execute_instruction(instruction, memory);
-            println!("{:?}, {:?}, {:?}", result.state, result.cycles, result.bytes_read);
+            println!("{:?}, cycles: {:?}, instruction length: {:?}", result.state, result.cycles, result.instruction_length);
             self.state = result.state;
             self.stats.total_cycles += result.cycles as usize;
         } else {
@@ -91,7 +91,7 @@ impl CPU {
     fn execute_instruction(&self, instruction: Instruction, memory: &mut Memory) -> InstructionResult {
         match instruction.mnemonic {
             Mnemonic::NOP => evaluate_nop(&self.state),
-            Mnemonic::LDA => evaluate_lda(&self.state, instruction.addressing_mode, memory),
+            Mnemonic::LDA | Mnemonic::LDX | Mnemonic::LDY => evaluate_transfer(&self.state, memory, instruction.mnemonic, instruction.addressing_mode),
             _ => panic!("unimplemented instruction: {:?}", instruction),
         }
     }

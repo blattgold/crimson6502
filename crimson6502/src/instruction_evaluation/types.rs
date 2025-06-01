@@ -4,15 +4,15 @@ use crate::cpu::CPUState;
 pub struct InstructionResult {
     pub state: CPUState,
     pub cycles: u8,
-    pub bytes_read: u8,
+    pub instruction_length: u8,
 }
 
 impl InstructionResult {
-    pub fn new(state: CPUState, cycles: u8, bytes_read: u8) -> InstructionResult {
+    pub fn new(state: CPUState, cycles: u8, instruction_length: u8) -> InstructionResult {
         Self {
             state: state,
             cycles: cycles,
-            bytes_read: bytes_read,
+            instruction_length: instruction_length,
         }
     }
 }

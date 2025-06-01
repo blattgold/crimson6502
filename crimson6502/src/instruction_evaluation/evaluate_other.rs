@@ -7,7 +7,7 @@ pub fn evaluate_nop(state: &CPUState) -> InstructionResult {
             pc: state.pc + 1,
             ..*state
         },
-        2u8,
-        1u8,
+        2,
+        0,
     ) 
 }

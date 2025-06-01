@@ -16,8 +16,8 @@ Load accumulator with memory (A = M)
   - [x] absolute — 4 cycles  
   - [x] absolute,X — 4 cycles + 1 if page boundary crossed  
   - [x] absolute,Y — 4 cycles + 1 if page boundary crossed  
-  - [ ] (indirect,X) — 6 cycles  
-  - [ ] (indirect),Y — 5 cycles + 1 if page boundary crossed  
+  - [x] (indirect,X) — 6 cycles  
+  - [x] (indirect),Y — 5 cycles + 1 if page boundary crossed  
 
 ### LDX  
 Load X register with memory (X = M)  
@@ -29,11 +29,11 @@ Load X register with memory (X = M)
   - Fetch operand, load into X, update N/Z.  
   - Handle zero‐page indexing wrap for zeropage,Y.  
 - Addressing modes & typical cycles:  
-  - [ ] immediate — 2 cycles  
-  - [ ] zeropage — 3 cycles  
-  - [ ] zeropage,Y — 4 cycles  
-  - [ ] absolute — 4 cycles  
-  - [ ] absolute,Y — 4 cycles + 1 if page boundary crossed  
+  - [x] immediate — 2 cycles  
+  - [x] zeropage — 3 cycles  
+  - [x] zeropage,Y — 4 cycles  
+  - [x] absolute — 4 cycles  
+  - [x] absolute,Y — 4 cycles + 1 if page boundary crossed  
 
 ### LDY  
 Load Y register with memory (Y = M)  
@@ -45,11 +45,11 @@ Load Y register with memory (Y = M)
   - Fetch operand, load into Y, update N/Z.  
   - Handle zero‐page indexing wrap for zeropage,X.  
 - Addressing modes & typical cycles:  
-  - [ ] immediate — 2 cycles  
-  - [ ] zeropage — 3 cycles  
-  - [ ] zeropage,X — 4 cycles  
-  - [ ] absolute — 4 cycles  
-  - [ ] absolute,X — 4 cycles + 1 if page boundary crossed  
+  - [x] immediate — 2 cycles  
+  - [x] zeropage — 3 cycles  
+  - [x] zeropage,X — 4 cycles  
+  - [x] absolute — 4 cycles  
+  - [x] absolute,X — 4 cycles + 1 if page boundary crossed  
 
 ### STA  
 Store accumulator to memory (M = A)  

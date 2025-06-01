@@ -22,6 +22,8 @@ impl IndexedBy {
 pub enum Mnemonic {
     NOP,
     LDA,
+    LDX,
+    LDY,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -36,11 +38,11 @@ pub enum AddressingMode {
 impl AddressingMode {
     pub fn instruction_length(&self) -> u8 {
         match self {
-            AddressingMode::Implied => 1u8,
-            AddressingMode::Immediate => 2u8,
-            AddressingMode::ZeroPage(_) => 2u8,
-            AddressingMode::Absolute(_) => 3u8,
-            AddressingMode::Indirect(_) => 3u8,
+            AddressingMode::Implied => 0,
+            AddressingMode::Immediate => 1,
+            AddressingMode::ZeroPage(_) => 1,
+            AddressingMode::Absolute(_) => 2,
+            AddressingMode::Indirect(_) => 2,
         }
     }
 
@@ -64,8 +66,8 @@ impl AddressingMode {
         (match self {
             AddressingMode::Immediate => pc_next,
             AddressingMode::ZeroPage(indexed_by) => {
-                let addr: u8 = memory.read_byte(pc_next).wrapping_add(indexed_by.from_state(state));
-                addr as u16
+                let effective_addr: u8 = memory.read_byte(pc_next).wrapping_add(indexed_by.from_state(state));
+                effective_addr as u16
             },
             AddressingMode::Absolute(indexed_by) => {
                 let (addr_lo, addr_hi) = (memory.read_byte(pc_next), memory.read_byte(pc_next.wrapping_add(1)));
@@ -74,6 +76,20 @@ impl AddressingMode {
                 page_crossed = (addr & 0xFF00) != (effective_addr & 0xFF00);
                 effective_addr
             },
+            AddressingMode::Indirect(indexed_by) if *indexed_by == IndexedBy::X => {
+                let indirect_addr: u8 = memory.read_byte(pc_next).wrapping_add(indexed_by.from_state(state));
+                let (addr_lo, addr_hi) = (memory.read_byte(indirect_addr as u16), memory.read_byte(indirect_addr.wrapping_add(1) as u16));
+                let effective_addr: u16 = ((addr_hi as u16) << 8) | (addr_lo as u16);
+                effective_addr
+            },
+            AddressingMode::Indirect(indexed_by) if *indexed_by == IndexedBy::Y => {
+                let indirect_addr: u8 = memory.read_byte(pc_next);
+                let (addr_lo, addr_hi) = (memory.read_byte(indirect_addr as u16), memory.read_byte(indirect_addr.wrapping_add(1) as u16));
+                let addr: u16 = ((addr_hi as u16) << 8) | (addr_lo as u16);
+                let effective_addr: u16 = addr.wrapping_add(indexed_by.from_state(state) as u16);
+                page_crossed = (addr & 0xFF00) != (effective_addr & 0xFF00);
+                effective_addr
+            }
             _ => panic!("unimplemented AddressingMode handling for: {:?}", self),
         }, page_crossed)
     }
@@ -101,6 +117,8 @@ impl Instruction {
             0xAD => Some(Self::new(Mnemonic::LDA, AddressingMode::Absolute(IndexedBy::None))),
             0xBD => Some(Self::new(Mnemonic::LDA, AddressingMode::Absolute(IndexedBy::X))),
             0xB9 => Some(Self::new(Mnemonic::LDA, AddressingMode::Absolute(IndexedBy::Y))),
+            0xA1 => Some(Self::new(Mnemonic::LDA, AddressingMode::Indirect(IndexedBy::X))),
+            0xB1 => Some(Self::new(Mnemonic::LDA, AddressingMode::Indirect(IndexedBy::Y))),
             //NOP-----------------------------------------------------------------------------------
             0xEA => Some(Self::new(Mnemonic::NOP, AddressingMode::Implied)),
             _ => None,
