@@ -9,12 +9,12 @@ Crimson6502 is a work-in-progress 6502 emulator written in Rust.
 
 ### REPL Syntax
 
-quit # Exit the REPL
-init # Initialize all components (CPU and memory)
-init <component> # Initialize a specific component: mem or cpu
-write <addr> <value> # Write a byte to memory at the specified address
-step # Execute 1 instruction cycle
-step <n> # Execute n instruction cycles
+- quit - Exit the REPL
+- init - Initialize all components (CPU and memory)
+- init \<component> - Initialize a specific component: mem or cpu
+- write \<addr> \<value> - Write a byte to memory at the specified address
+- step - Execute 1 instruction cycle
+- step \<n> - Execute n instruction cycles
 
 ### Opcode Coverage
 
