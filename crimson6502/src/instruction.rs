@@ -8,6 +8,16 @@ pub enum IndexedBy {
     Y,
 }
 
+impl IndexedBy {
+    fn from_state(&self, state: &CPUState) -> u8 {
+        match self {
+            IndexedBy::None => 0u8,
+            IndexedBy::X => state.x,
+            IndexedBy::Y => state.y,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum Mnemonic {
     NOP,
@@ -21,17 +31,6 @@ pub enum AddressingMode {
     ZeroPage(IndexedBy),
     Absolute(IndexedBy),
     Indirect(IndexedBy),
-}
-
-pub enum MemoryReadResult {
-    Err,
-    u8(u8),
-    u16(u16),
-}
-
-pub enum MemoryWriteValue {
-    u8(u8),
-    u16(u16),
 }
 
 impl AddressingMode {
@@ -54,19 +53,29 @@ impl AddressingMode {
         )
     }
 
-    pub fn read_from_memory(&self, memory: &Memory, addr: u16) -> MemoryReadResult {
-        match self {
-            AddressingMode::Immediate => MemoryReadResult::u8(memory.read_byte(addr)),
-            _ => MemoryReadResult::Err,
-        }
+    pub fn get_operand(&self, state: &CPUState, memory: &Memory) -> (u8, bool) {
+        let (addr, page_crossed) = self.effective_operand_address(state, memory);
+        (memory.read_byte(addr), page_crossed)
     }
 
-    pub fn write_to_memory(&self, memory: &mut Memory, addr: u16, value: MemoryWriteValue) {
-        match (self, value)  {
-            (AddressingMode::Immediate, MemoryWriteValue::u8(value)) 
-                => memory.write_byte(addr, value),
-            _ => (),
-        }
+    fn effective_operand_address(&self, state: &CPUState, memory: &Memory) -> (u16, bool) {
+        let pc_next: u16 = state.pc.wrapping_add(1);
+        let mut page_crossed: bool = false;
+        (match self {
+            AddressingMode::Immediate => pc_next,
+            AddressingMode::ZeroPage(indexed_by) => {
+                let addr: u8 = memory.read_byte(pc_next).wrapping_add(indexed_by.from_state(state));
+                addr as u16
+            },
+            AddressingMode::Absolute(indexed_by) => {
+                let (addr_lo, addr_hi) = (memory.read_byte(pc_next), memory.read_byte(pc_next.wrapping_add(1)));
+                let addr: u16 = ((addr_hi as u16) << 8) | (addr_lo as u16);
+                let effective_addr: u16 = addr.wrapping_add(indexed_by.from_state(state) as u16);
+                page_crossed = (addr & 0xFF00) != (effective_addr & 0xFF00);
+                effective_addr
+            },
+            _ => panic!("unimplemented AddressingMode handling for: {:?}", self),
+        }, page_crossed)
     }
 }
 
@@ -85,7 +94,14 @@ impl Instruction {
     }
     pub fn from_byte(byte: u8) -> Option<Self> {
         match byte {
+            //LDA-----------------------------------------------------------------------------------
             0xA9 => Some(Self::new(Mnemonic::LDA, AddressingMode::Immediate)),
+            0xA5 => Some(Self::new(Mnemonic::LDA, AddressingMode::ZeroPage(IndexedBy::None))),
+            0xB5 => Some(Self::new(Mnemonic::LDA, AddressingMode::ZeroPage(IndexedBy::X))),
+            0xAD => Some(Self::new(Mnemonic::LDA, AddressingMode::Absolute(IndexedBy::None))),
+            0xBD => Some(Self::new(Mnemonic::LDA, AddressingMode::Absolute(IndexedBy::X))),
+            0xB9 => Some(Self::new(Mnemonic::LDA, AddressingMode::Absolute(IndexedBy::Y))),
+            //NOP-----------------------------------------------------------------------------------
             0xEA => Some(Self::new(Mnemonic::NOP, AddressingMode::Implied)),
             _ => None,
         }

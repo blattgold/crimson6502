@@ -44,7 +44,7 @@ impl CPUState {
     pub fn new() -> CPUState {
         Self {
             a: 0,
-            x: 0,
+            x: 1,
             y: 0,
             s: 0,
             pc: 0,
