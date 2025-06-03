@@ -95,7 +95,7 @@ Transfer accumulator to X register (X = A)
 - Implementation notes:  
   - Copy A → X, update N/Z.  
 - Addressing mode & cycles:  
-  - [ ] implied — 2 cycles  
+  - [x] implied — 2 cycles  
 
 ### TAY  
 Transfer accumulator to Y register (Y = A)  
@@ -106,7 +106,7 @@ Transfer accumulator to Y register (Y = A)
 - Implementation notes:  
   - Copy A → Y, update N/Z.  
 - Addressing mode & cycles:  
-  - [ ] implied — 2 cycles  
+  - [x] implied — 2 cycles  
 
 ### TSX  
 Transfer stack pointer to X register (X = SP)  
@@ -117,7 +117,7 @@ Transfer stack pointer to X register (X = SP)
 - Implementation notes:  
   - Copy SP → X, update N/Z.  
 - Addressing mode & cycles:  
-  - [ ] implied — 2 cycles  
+  - [x] implied — 2 cycles  
 
 ### TXA  
 Transfer X register to accumulator (A = X)  
@@ -128,7 +128,7 @@ Transfer X register to accumulator (A = X)
 - Implementation notes:  
   - Copy X → A, update N/Z.  
 - Addressing mode & cycles:  
-  - [ ] implied — 2 cycles  
+  - [x] implied — 2 cycles  
 
 ### TXS  
 Transfer X register to stack pointer (SP = X)  
@@ -137,7 +137,7 @@ Transfer X register to stack pointer (SP = X)
   - Copy X → SP.  
   - No flag updates.  
 - Addressing mode & cycles:  
-  - [ ] implied — 2 cycles  
+  - [x] implied — 2 cycles  
 
 ### TYA  
 Transfer Y register to accumulator (A = Y)  
@@ -148,4 +148,4 @@ Transfer Y register to accumulator (A = Y)
 - Implementation notes:  
   - Copy Y → A, update N/Z.  
 - Addressing mode & cycles:  
-  - [ ] implied — 2 cycles  
+  - [x] implied — 2 cycles  

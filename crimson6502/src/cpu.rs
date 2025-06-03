@@ -1,7 +1,7 @@
 use bitflags::bitflags;
 use crate::memory::Memory;
 use crate::instruction::{Instruction, Mnemonic};
-use crate::instruction_evaluation::{evaluate_load, evaluate_nop, evaluate_store, InstructionResult};
+use crate::instruction_evaluation::{evaluate_load, evaluate_nop, evaluate_store, evaluate_transfer, InstructionResult};
 
 bitflags! {
     #[derive(Clone, Copy, Debug)]
@@ -91,9 +91,14 @@ impl CPU {
 
     fn execute_instruction(&self, instruction: Instruction, memory: &mut Memory) -> InstructionResult {
         match instruction.mnemonic {
-            Mnemonic::NOP => evaluate_nop(&self.state),
-            Mnemonic::LDA | Mnemonic::LDX | Mnemonic::LDY => evaluate_load(&self.state, memory, instruction.mnemonic, instruction.addressing_mode),
-            Mnemonic::STA | Mnemonic::STX | Mnemonic::STY => evaluate_store(&self.state, memory, instruction.mnemonic, instruction.addressing_mode),
+            Mnemonic::NOP 
+                => evaluate_nop(&self.state),
+            Mnemonic::LDA | Mnemonic::LDX | Mnemonic::LDY 
+                => evaluate_load(&self.state, memory, instruction.mnemonic, instruction.addressing_mode),
+            Mnemonic::STA | Mnemonic::STX | Mnemonic::STY 
+                => evaluate_store(&self.state, memory, instruction.mnemonic, instruction.addressing_mode),
+            Mnemonic::TAX | Mnemonic::TAY | Mnemonic::TSX | Mnemonic::TXA | Mnemonic::TXS | Mnemonic::TYA 
+                => evaluate_transfer(&self.state, memory, instruction.mnemonic, instruction.addressing_mode) 
         }
     }
 }

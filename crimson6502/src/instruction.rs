@@ -21,12 +21,9 @@ impl IndexedBy {
 #[derive(Debug, Clone, Copy)]
 pub enum Mnemonic {
     NOP,
-    LDA,
-    LDX,
-    LDY,
-    STA,
-    STX,
-    STY
+    LDA, LDX, LDY,
+    STA, STX, STY,
+    TAX, TAY, TSX, TXA, TXS, TYA
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -149,6 +146,13 @@ impl Instruction {
             0x84 => Some(Self::new(Mnemonic::STY, AddressingMode::ZeroPage(IndexedBy::None))),
             0x94 => Some(Self::new(Mnemonic::STY, AddressingMode::ZeroPage(IndexedBy::X))),
             0x8C => Some(Self::new(Mnemonic::STY, AddressingMode::Absolute(IndexedBy::None))),
+            //TAX-TAY-TSX-TXA-TXS-TYA---------------------------------------------------------------
+            0xAA => Some(Self::new(Mnemonic::TAX, AddressingMode::Implied)),
+            0xA8 => Some(Self::new(Mnemonic::TAY, AddressingMode::Implied)),
+            0xBA => Some(Self::new(Mnemonic::TSX, AddressingMode::Implied)),
+            0x8A => Some(Self::new(Mnemonic::TXA, AddressingMode::Implied)),
+            0x9A => Some(Self::new(Mnemonic::TXS, AddressingMode::Implied)),
+            0x98 => Some(Self::new(Mnemonic::TYA, AddressingMode::Implied)),
             //NOP-----------------------------------------------------------------------------------
             0xEA => Some(Self::new(Mnemonic::NOP, AddressingMode::Implied)),
             //--------------------------------------------------------------------------------------
