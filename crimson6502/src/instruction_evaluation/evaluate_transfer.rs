@@ -94,3 +94,39 @@ pub fn evaluate_transfer(state: &CPUState, memory: &mut Memory, mnemonic: Mnemon
         addressing_mode.instruction_length()
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_evaluate_load() {
+        let state: CPUState = CPUState {
+            pc: 1,
+            ..CPUState::new()
+        };
+
+        let mut memory: Memory = Memory::new();
+
+        memory.write_byte(2, 10);
+        memory.write_byte(10, 123);
+
+        assert_eq!(
+            evaluate_load(
+                &state, 
+                &memory, 
+                Mnemonic::LDA, 
+                AddressingMode::ZeroPage(IndexedBy::None)
+            ),
+            InstructionResult::new(
+                CPUState {
+                    pc: 3,
+                    a: 123,
+                    ..state
+                },
+                3,
+                1
+            )
+        )
+    }
+}

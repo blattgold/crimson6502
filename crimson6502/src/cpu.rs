@@ -4,7 +4,7 @@ use crate::instruction::{Instruction, Mnemonic};
 use crate::instruction_evaluation::{evaluate_load, evaluate_nop, evaluate_store, evaluate_transfer, InstructionResult};
 
 bitflags! {
-    #[derive(Clone, Copy, Debug)]
+    #[derive(Clone, Copy, Debug, PartialEq)]
     pub struct CPUFlags: u8 {
         const C = 0b00000001;
         const Z = 0b00000010;
@@ -16,7 +16,7 @@ bitflags! {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct CPUState {
     pub a: u8,
     pub x: u8,
@@ -26,14 +26,14 @@ pub struct CPUState {
     pub flags: CPUFlags,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct CPUStats {
     total_cycles: usize,
     instructions: usize,
 }
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct CPU {
     state: CPUState,
     stats: CPUStats,

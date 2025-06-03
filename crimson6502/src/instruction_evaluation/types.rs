@@ -1,6 +1,6 @@
 use crate::cpu::CPUState;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct InstructionResult {
     pub state: CPUState,
     pub cycles: u8,
