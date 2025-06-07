@@ -6,11 +6,7 @@ edition = "2024"
 [lib]
 path = "src/lib.rs"
 
-[dependencies.bitflags]
-version = "2.9.1"
-
 [profile.release]
 lto = true
 codegen-units = 1
 opt_level = "3"
-

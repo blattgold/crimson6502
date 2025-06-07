@@ -1,5 +1,4 @@
 use crate::instruction_evaluation::types::InstructionResult;
-use crate::cpu::CPUState;
 use crate::CPU;
 
 pub fn evaluate_nop(cpu: &CPU) -> InstructionResult {

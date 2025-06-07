@@ -69,9 +69,8 @@ impl CLISession {
     }
 
     fn run_file(&mut self) {
-        let mut memory: &mut Memory = self.memory.as_mut().unwrap();
         for (i, value) in self.file_contents.clone().unwrap().into_iter().enumerate() {
-            memory.write_byte(i as u16, value);
+            self.cpu.as_mut().unwrap().write_byte(i as u16, value);
         }
     }
 
@@ -91,16 +90,16 @@ impl CLISession {
                 Signal::CPUStep(_) 
                     => println!("CPU and/or Memory have not been initialized."),
                 Signal::InitCPU
-                    => self.cpu = Some(CPU::new(CPUState::new())),
+                    => self.cpu = Some(CPU::new(CPUState::new(), Memory::new())),
                 Signal::InitMemory
                     => self.memory = Some(Memory::new()),
                 Signal::InitAll
                     => {
-                        self.cpu = Some(CPU::new(CPUState::new()));
+                        self.cpu = Some(CPU::new(CPUState::new(), Memory::new()));
                         self.memory = Some(Memory::new());
                     },
                 Signal::WriteMemory(addr, value) if self.memory.is_some() 
-                    => self.memory.as_mut().unwrap().write_byte(addr, value),
+                    => self.cpu.as_mut().unwrap().write_byte(addr, value),
                 Signal::WriteMemory(_, _)
                     => println!("Cannot write to Memory, it has not been initialized."),
                 Signal::FileOpen(path)
@@ -116,12 +115,7 @@ impl CLISession {
             self.cpu
                 .as_mut()
                 .unwrap()
-                .run(
-                    self
-                    .memory
-                    .as_mut()
-                    .unwrap()
-                );
+                .run();
         }
     }
 

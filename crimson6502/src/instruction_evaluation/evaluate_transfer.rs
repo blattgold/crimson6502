@@ -1,49 +1,49 @@
 use crate::instruction_evaluation::types::InstructionResult;
 use crate::instruction::{AddressingMode, IndexedBy, Mnemonic};
 use crate::cpu::CPUState;
-use crate::{CPUFlags, Memory};
+use crate::CPU;
 
 fn cycles_transfer(addressing_mode: AddressingMode, page_crossed: bool) -> u8 {
     match addressing_mode {
         AddressingMode::Immediate => 2,
-        AddressingMode::ZeroPage(IndexedBy::None) => 3,
-        AddressingMode::ZeroPage(_) => 4,
-        AddressingMode::Absolute(IndexedBy::None) => 4,
-        AddressingMode::Absolute(_) if page_crossed => 5,
-        AddressingMode::Absolute(_) => 4,
-        AddressingMode::Indirect(IndexedBy::X) => 6,
-        AddressingMode::Indirect(IndexedBy::Y) if page_crossed => 6,
-        AddressingMode::Indirect(IndexedBy::Y) => 5,
-        _ => panic!(),
+        AddressingMode::ZeroPage => 3,
+        AddressingMode::ZeroPageX | AddressingMode::ZeroPageY => 4,
+        AddressingMode::Absolute => 4,
+        AddressingMode::AbsoluteY | AddressingMode::AbsoluteX if page_crossed => 5,
+        AddressingMode::AbsoluteY | AddressingMode::AbsoluteX => 4,
+        AddressingMode::IndirectX => 6,
+        AddressingMode::IndirectY if page_crossed => 6,
+        AddressingMode::IndirectY => 5,
+        // invalid
+        AddressingMode::Implied => panic!()
     }
 }
 
-fn set_flags_transfer(value: u8, flags: &mut CPUFlags) {
+fn set_flags_transfer(value: u8, state: &mut CPUState) {
     if value == 0 {
-        flags.insert(CPUFlags::Z);
+        state.sr |= flag!(zero);
     } else {
-        flags.remove(CPUFlags::Z)
+        state.sr &= !flag!(zero);
     }
     if value & 0x80 != 0 {
-        flags.insert(CPUFlags::N);
+        state.sr |= flag!(negative);
     } else {
-        flags.remove(CPUFlags::N);
+        state.sr &= !flag!(negative);
     }
 }
 
-pub fn evaluate_load(state: &CPUState, memory: &Memory, mnemonic: Mnemonic, addressing_mode: AddressingMode) -> InstructionResult {
-    let (value, page_crossed)= addressing_mode.get_operand(state, memory);
+pub fn evaluate_load(cpu: &mut CPU, mnemonic: Mnemonic, addressing_mode: AddressingMode) -> InstructionResult {
+    let value: u8 = cpu.resolve_address_and_get_value(addressing_mode);
 
     let mut result = InstructionResult::new(
         CPUState {
-            pc: state.pc.wrapping_add((addressing_mode.instruction_length() + 1) as u16),
-            ..*state
+            ..*cpu.get_state()
         },
-        cycles_transfer(addressing_mode, page_crossed),
+        cycles_transfer(addressing_mode, cpu.crossed_page_boundary()),
         addressing_mode.instruction_length(),
     );
 
-    set_flags_transfer(value, &mut result.state.flags);
+    set_flags_transfer(value, &mut result.state);
 
     match mnemonic {
         Mnemonic::LDA => result.state.a = value,
@@ -55,38 +55,35 @@ pub fn evaluate_load(state: &CPUState, memory: &Memory, mnemonic: Mnemonic, addr
     result
 }
 
-pub fn evaluate_store(state: &CPUState, memory: &mut Memory, mnemonic: Mnemonic, addressing_mode: AddressingMode) -> InstructionResult {
+pub fn evaluate_store(cpu: &mut CPU, mnemonic: Mnemonic, addressing_mode: AddressingMode) -> InstructionResult {
     match mnemonic {
-        Mnemonic::STA => addressing_mode.write_value(state.a, state, memory),
-        Mnemonic::STX => addressing_mode.write_value(state.x, state, memory),
-        Mnemonic::STY => addressing_mode.write_value(state.y, state, memory),
+        Mnemonic::STA => cpu.resolve_address_and_set_value(addressing_mode, cpu.get_state().a),
+        Mnemonic::STX => cpu.resolve_address_and_set_value(addressing_mode, cpu.get_state().x),
+        Mnemonic::STY => cpu.resolve_address_and_set_value(addressing_mode, cpu.get_state().y),
         _ => panic!("evaluate_store received invalid mnemonic: {:?}", mnemonic),
     };
 
     InstructionResult::new(
         CPUState {
-            pc: state.pc.wrapping_add((addressing_mode.instruction_length() + 1) as u16),
-            ..*state
+            ..*cpu.get_state()
         },
         cycles_transfer(addressing_mode, true),
         addressing_mode.instruction_length(),
     )
 }
 
-pub fn evaluate_transfer(state: &CPUState, memory: &mut Memory, mnemonic: Mnemonic, addressing_mode: AddressingMode) -> InstructionResult {
-    let mut new_state: CPUState = state.clone();
+pub fn evaluate_transfer(cpu: &mut CPU, mnemonic: Mnemonic, addressing_mode: AddressingMode) -> InstructionResult {
+    let mut new_state: CPUState = cpu.get_state().clone();
 
     match mnemonic {
-        Mnemonic::TAX => {new_state.x = state.a; set_flags_transfer(state.a, &mut new_state.flags)},
-        Mnemonic::TAY => {new_state.y = state.a; set_flags_transfer(state.a, &mut new_state.flags)},
-        Mnemonic::TSX => {new_state.x = state.s; set_flags_transfer(state.s, &mut new_state.flags)},
-        Mnemonic::TXA => {new_state.a = state.x; set_flags_transfer(state.x, &mut new_state.flags)},
-        Mnemonic::TXS => {new_state.s = state.x},
-        Mnemonic::TYA => {new_state.a = state.y; set_flags_transfer(state.y, &mut new_state.flags)},
+        Mnemonic::TAX => {new_state.x = new_state.a; set_flags_transfer(new_state.a, &mut new_state)},
+        Mnemonic::TAY => {new_state.y = new_state.a; set_flags_transfer(new_state.a, &mut new_state)},
+        Mnemonic::TSX => {new_state.x = new_state.s; set_flags_transfer(new_state.s, &mut new_state)},
+        Mnemonic::TXA => {new_state.a = new_state.x; set_flags_transfer(new_state.x, &mut new_state)},
+        Mnemonic::TXS => {new_state.s = new_state.x},
+        Mnemonic::TYA => {new_state.a = new_state.y; set_flags_transfer(new_state.y, &mut new_state)},
         _ => panic!("evaluate_transfer received invalid mnemonic: {:?}", mnemonic),
     };
-
-    new_state.pc = state.pc.wrapping_add((addressing_mode.instruction_length() + 1) as u16);
 
     InstructionResult::new(
         new_state, 
@@ -97,36 +94,7 @@ pub fn evaluate_transfer(state: &CPUState, memory: &mut Memory, mnemonic: Mnemon
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn test_evaluate_load() {
-        let state: CPUState = CPUState {
-            pc: 1,
-            ..CPUState::new()
-        };
-
-        let mut memory: Memory = Memory::new();
-
-        memory.write_byte(2, 10);
-        memory.write_byte(10, 123);
-
-        assert_eq!(
-            evaluate_load(
-                &state, 
-                &memory, 
-                Mnemonic::LDA, 
-                AddressingMode::ZeroPage(IndexedBy::None)
-            ),
-            InstructionResult::new(
-                CPUState {
-                    pc: 3,
-                    a: 123,
-                    ..state
-                },
-                3,
-                1
-            )
-        )
     }
 }

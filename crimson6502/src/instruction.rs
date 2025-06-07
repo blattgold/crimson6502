@@ -9,7 +9,7 @@ pub enum IndexedBy {
 }
 
 impl IndexedBy {
-    fn from_state(&self, state: &CPUState) -> u8 {
+    pub fn from_state(&self, state: &CPUState) -> u8 {
         match self {
             IndexedBy::None => 0u8,
             IndexedBy::X => state.x,
@@ -30,9 +30,14 @@ pub enum Mnemonic {
 pub enum AddressingMode {
     Implied,
     Immediate,
-    ZeroPage(IndexedBy),
-    Absolute(IndexedBy),
-    Indirect(IndexedBy),
+    ZeroPage,
+    ZeroPageX,
+    ZeroPageY,
+    Absolute,
+    AbsoluteX,
+    AbsoluteY,
+    IndirectX,
+    IndirectY
 }
 
 impl AddressingMode {
@@ -40,57 +45,10 @@ impl AddressingMode {
         match self {
             AddressingMode::Implied => 0,
             AddressingMode::Immediate => 1,
-            AddressingMode::ZeroPage(_) => 1,
-            AddressingMode::Absolute(_) => 2,
-            AddressingMode::Indirect(_) => 2,
+            AddressingMode::ZeroPage | AddressingMode::ZeroPageX | AddressingMode::ZeroPageY => 1,
+            AddressingMode::Absolute | AddressingMode::AbsoluteX | AddressingMode::AbsoluteY => 2,
+            AddressingMode::IndirectX | AddressingMode::IndirectY => 2,
         }
-    }
-
-    pub fn get_operand(&self, state: &CPUState, memory: &Memory) -> (u8, bool) {
-        let (addr, page_crossed) = self.effective_operand_address(state, memory);
-        (memory.read_byte(addr), page_crossed)
-    }
-
-    pub fn write_value(&self, value: u8, state: &CPUState, memory: &mut Memory) {
-        let (addr, _) = self.effective_operand_address(state, memory);
-        memory.write_byte(addr, value);
-    }
-
-    fn effective_operand_address(&self, state: &CPUState, memory: &Memory) -> (u16, bool) {
-        let pc_next: u16 = state.pc.wrapping_add(1);
-        let mut page_crossed: bool = false;
-        (match self {
-            AddressingMode::Immediate => pc_next,
-            AddressingMode::ZeroPage(indexed_by) => {
-                let effective_addr: u8 = memory.read_byte(pc_next).wrapping_add(indexed_by.from_state(state));
-                effective_addr as u16
-            },
-            AddressingMode::Absolute(indexed_by) => {
-                let (addr_lo, addr_hi) = (memory.read_byte(pc_next), memory.read_byte(pc_next.wrapping_add(1)));
-                let addr: u16 = ((addr_hi as u16) << 8) | (addr_lo as u16);
-                let effective_addr: u16 = addr.wrapping_add(indexed_by.from_state(state) as u16);
-                page_crossed = (addr & 0xFF00) != (effective_addr & 0xFF00);
-                effective_addr
-            },
-            AddressingMode::Indirect(indexed_by) => {
-                if *indexed_by == IndexedBy::X {
-                    let indirect_addr: u8 = memory.read_byte(pc_next).wrapping_add(indexed_by.from_state(state));
-                    let (addr_lo, addr_hi) = (memory.read_byte(indirect_addr as u16), memory.read_byte(indirect_addr.wrapping_add(1) as u16));
-                    let effective_addr: u16 = ((addr_hi as u16) << 8) | (addr_lo as u16);
-                    effective_addr
-                } else if *indexed_by == IndexedBy::Y {
-                    let indirect_addr: u8 = memory.read_byte(pc_next);
-                    let (addr_lo, addr_hi) = (memory.read_byte(indirect_addr as u16), memory.read_byte(indirect_addr.wrapping_add(1) as u16));
-                    let addr: u16 = ((addr_hi as u16) << 8) | (addr_lo as u16);
-                    let effective_addr: u16 = addr.wrapping_add(indexed_by.from_state(state) as u16);
-                    page_crossed = (addr & 0xFF00) != (effective_addr & 0xFF00);
-                    effective_addr
-                } else {
-                    panic!();
-                }
-            },
-            _ => panic!("unimplemented AddressingMode handling for: {:?}", self),
-        }, page_crossed)
     }
 }
 
@@ -111,41 +69,41 @@ impl Instruction {
         match byte {
             //LDA-----------------------------------------------------------------------------------
             0xA9 => Some(Self::new(Mnemonic::LDA, AddressingMode::Immediate)),
-            0xA5 => Some(Self::new(Mnemonic::LDA, AddressingMode::ZeroPage(IndexedBy::None))),
-            0xB5 => Some(Self::new(Mnemonic::LDA, AddressingMode::ZeroPage(IndexedBy::X))),
-            0xAD => Some(Self::new(Mnemonic::LDA, AddressingMode::Absolute(IndexedBy::None))),
-            0xBD => Some(Self::new(Mnemonic::LDA, AddressingMode::Absolute(IndexedBy::X))),
-            0xB9 => Some(Self::new(Mnemonic::LDA, AddressingMode::Absolute(IndexedBy::Y))),
-            0xA1 => Some(Self::new(Mnemonic::LDA, AddressingMode::Indirect(IndexedBy::X))),
-            0xB1 => Some(Self::new(Mnemonic::LDA, AddressingMode::Indirect(IndexedBy::Y))),
+            0xA5 => Some(Self::new(Mnemonic::LDA, AddressingMode::ZeroPage)),
+            0xB5 => Some(Self::new(Mnemonic::LDA, AddressingMode::ZeroPageX)),
+            0xAD => Some(Self::new(Mnemonic::LDA, AddressingMode::Absolute)),
+            0xBD => Some(Self::new(Mnemonic::LDA, AddressingMode::AbsoluteX)),
+            0xB9 => Some(Self::new(Mnemonic::LDA, AddressingMode::AbsoluteY)),
+            0xA1 => Some(Self::new(Mnemonic::LDA, AddressingMode::IndirectX)),
+            0xB1 => Some(Self::new(Mnemonic::LDA, AddressingMode::IndirectY)),
             //LDX-----------------------------------------------------------------------------------
             0xA2 => Some(Self::new(Mnemonic::LDX, AddressingMode::Immediate)),
-            0xA6 => Some(Self::new(Mnemonic::LDX, AddressingMode::ZeroPage(IndexedBy::None))),
-            0xB6 => Some(Self::new(Mnemonic::LDX, AddressingMode::ZeroPage(IndexedBy::Y))),
-            0xAE => Some(Self::new(Mnemonic::LDX, AddressingMode::Absolute(IndexedBy::None))),
-            0xBE => Some(Self::new(Mnemonic::LDX, AddressingMode::Absolute(IndexedBy::Y))),
+            0xA6 => Some(Self::new(Mnemonic::LDX, AddressingMode::ZeroPage)),
+            0xB6 => Some(Self::new(Mnemonic::LDX, AddressingMode::ZeroPageY)),
+            0xAE => Some(Self::new(Mnemonic::LDX, AddressingMode::Absolute)),
+            0xBE => Some(Self::new(Mnemonic::LDX, AddressingMode::AbsoluteY)),
             //LDY-----------------------------------------------------------------------------------
             0xA0 => Some(Self::new(Mnemonic::LDY, AddressingMode::Immediate)),
-            0xA4 => Some(Self::new(Mnemonic::LDY, AddressingMode::ZeroPage(IndexedBy::None))),
-            0xB4 => Some(Self::new(Mnemonic::LDY, AddressingMode::ZeroPage(IndexedBy::X))),
-            0xAC => Some(Self::new(Mnemonic::LDY, AddressingMode::Absolute(IndexedBy::None))),
-            0xBC => Some(Self::new(Mnemonic::LDY, AddressingMode::Absolute(IndexedBy::X))),
+            0xA4 => Some(Self::new(Mnemonic::LDY, AddressingMode::ZeroPage)),
+            0xB4 => Some(Self::new(Mnemonic::LDY, AddressingMode::ZeroPageX)),
+            0xAC => Some(Self::new(Mnemonic::LDY, AddressingMode::Absolute)),
+            0xBC => Some(Self::new(Mnemonic::LDY, AddressingMode::AbsoluteX)),
             //STA-----------------------------------------------------------------------------------
-            0x85 => Some(Self::new(Mnemonic::STA, AddressingMode::ZeroPage(IndexedBy::None))),
-            0x95 => Some(Self::new(Mnemonic::STA, AddressingMode::ZeroPage(IndexedBy::X))),
-            0x8D => Some(Self::new(Mnemonic::STA, AddressingMode::Absolute(IndexedBy::None))),
-            0x9D => Some(Self::new(Mnemonic::STA, AddressingMode::Absolute(IndexedBy::X))),
-            0x99 => Some(Self::new(Mnemonic::STA, AddressingMode::Absolute(IndexedBy::Y))),
-            0x81 => Some(Self::new(Mnemonic::STA, AddressingMode::Indirect(IndexedBy::X))),
-            0x91 => Some(Self::new(Mnemonic::STA, AddressingMode::Indirect(IndexedBy::Y))),
+            0x85 => Some(Self::new(Mnemonic::STA, AddressingMode::ZeroPage)),
+            0x95 => Some(Self::new(Mnemonic::STA, AddressingMode::ZeroPageX)),
+            0x8D => Some(Self::new(Mnemonic::STA, AddressingMode::Absolute)),
+            0x9D => Some(Self::new(Mnemonic::STA, AddressingMode::AbsoluteX)),
+            0x99 => Some(Self::new(Mnemonic::STA, AddressingMode::AbsoluteY)),
+            0x81 => Some(Self::new(Mnemonic::STA, AddressingMode::IndirectX)),
+            0x91 => Some(Self::new(Mnemonic::STA, AddressingMode::IndirectY)),
             //STX-----------------------------------------------------------------------------------
-            0x86 => Some(Self::new(Mnemonic::STX, AddressingMode::ZeroPage(IndexedBy::None))),
-            0x96 => Some(Self::new(Mnemonic::STX, AddressingMode::ZeroPage(IndexedBy::X))),
-            0x8E => Some(Self::new(Mnemonic::STX, AddressingMode::Absolute(IndexedBy::None))),
+            0x86 => Some(Self::new(Mnemonic::STX, AddressingMode::ZeroPage)),
+            0x96 => Some(Self::new(Mnemonic::STX, AddressingMode::ZeroPageX)),
+            0x8E => Some(Self::new(Mnemonic::STX, AddressingMode::Absolute)),
             //STY-----------------------------------------------------------------------------------
-            0x84 => Some(Self::new(Mnemonic::STY, AddressingMode::ZeroPage(IndexedBy::None))),
-            0x94 => Some(Self::new(Mnemonic::STY, AddressingMode::ZeroPage(IndexedBy::X))),
-            0x8C => Some(Self::new(Mnemonic::STY, AddressingMode::Absolute(IndexedBy::None))),
+            0x84 => Some(Self::new(Mnemonic::STY, AddressingMode::ZeroPage)),
+            0x94 => Some(Self::new(Mnemonic::STY, AddressingMode::ZeroPageX)),
+            0x8C => Some(Self::new(Mnemonic::STY, AddressingMode::Absolute)),
             //TAX-TAY-TSX-TXA-TXS-TYA---------------------------------------------------------------
             0xAA => Some(Self::new(Mnemonic::TAX, AddressingMode::Implied)),
             0xA8 => Some(Self::new(Mnemonic::TAY, AddressingMode::Implied)),
