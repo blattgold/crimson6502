@@ -75,6 +75,10 @@ impl CPU {
         self.state.pc = 0x1000u16;
     }
 
+    pub fn get_state(&self) -> &CPUState {
+        &self.state
+    }
+
     pub fn fetch_byte(&mut self) -> u8 {
         let fetched_byte: u8 = self.memory.read_byte(self.state.pc);
         self.state.pc += 1;
@@ -99,7 +103,7 @@ impl CPU {
     fn execute_instruction(&mut self, instruction: Instruction) -> InstructionResult {
         match instruction.mnemonic {
             Mnemonic::NOP 
-                => evaluate_nop(&self.state),
+                => evaluate_nop(&self),
             Mnemonic::LDA | Mnemonic::LDX | Mnemonic::LDY 
                 => evaluate_load(&self.state, &self.memory, instruction.mnemonic, instruction.addressing_mode),
             Mnemonic::STA | Mnemonic::STX | Mnemonic::STY 

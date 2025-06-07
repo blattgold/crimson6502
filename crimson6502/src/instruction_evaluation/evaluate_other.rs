@@ -1,12 +1,10 @@
 use crate::instruction_evaluation::types::InstructionResult;
 use crate::cpu::CPUState;
+use crate::CPU;
 
-pub fn evaluate_nop(state: &CPUState) -> InstructionResult {
+pub fn evaluate_nop(cpu: &CPU) -> InstructionResult {
     InstructionResult::new(
-        CPUState {
-            pc: state.pc + 1,
-            ..*state
-        },
+        cpu.get_state().clone(),
         2,
         0,
     ) 
