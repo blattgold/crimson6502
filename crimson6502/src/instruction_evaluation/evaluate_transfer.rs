@@ -1,5 +1,5 @@
 use crate::instruction_evaluation::types::InstructionResult;
-use crate::instruction::{AddressingMode, IndexedBy, Mnemonic};
+use crate::instruction::{AddressingMode, Mnemonic};
 use crate::cpu::CPUState;
 use crate::CPU;
 

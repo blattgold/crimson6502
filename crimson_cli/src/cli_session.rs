@@ -56,7 +56,7 @@ impl CLISession {
     fn read_file(&mut self, path: &str) {
         if let Ok(mut file) = fs::File::open(path.to_string() + ".txt") {
             let mut buffer =  String::new();
-            file.read_to_string(&mut buffer);
+            let _ = file.read_to_string(&mut buffer);
             let x = buffer.split_whitespace().map(|x: &str| u8::from_str_radix(x, 16)).collect();
             let vec: Vec<u8> = match x {
                 Ok(v) => v,

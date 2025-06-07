@@ -1,23 +1,3 @@
-use crate::Memory;
-use crate::CPUState;
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum IndexedBy {
-    None,
-    X,
-    Y,
-}
-
-impl IndexedBy {
-    pub fn from_state(&self, state: &CPUState) -> u8 {
-        match self {
-            IndexedBy::None => 0u8,
-            IndexedBy::X => state.x,
-            IndexedBy::Y => state.y,
-        }
-    }
-}
-
 #[derive(Debug, Clone, Copy)]
 pub enum Mnemonic {
     NOP,
