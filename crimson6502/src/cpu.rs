@@ -75,6 +75,12 @@ impl CPU {
         self.state.pc = 0x1000u16;
     }
 
+    pub fn fetch_byte(&mut self) -> u8 {
+        let fetched_byte: u8 = self.memory.read_byte(self.state.pc);
+        self.state.pc += 1;
+        fetched_byte
+    }
+
     pub fn run(&mut self) {
         let instruction_byte: u8 = self.memory.read_byte(self.state.pc);
         let instruction_option: Option<Instruction> = Instruction::from_byte(instruction_byte);
