@@ -37,8 +37,8 @@ pub struct CPUStats {
 pub struct CPU {
     state: CPUState,
     stats: CPUStats,
+    memory: Memory,
 }
-
 
 impl CPUState {
     pub fn new() -> CPUState {
@@ -63,10 +63,11 @@ impl CPUStats {
 }
 
 impl CPU {
-    pub fn new(state: CPUState) -> CPU {
+    pub fn new(state: CPUState, memory: Memory) -> CPU {
         Self {
             state: state,
             stats: CPUStats::new(),
+            memory: memory,
         }
     }
 
@@ -74,12 +75,12 @@ impl CPU {
         self.state.pc = 0x1000u16;
     }
 
-    pub fn run(&mut self, memory: &mut Memory) {
-        let instruction_byte: u8 = memory.read_byte(self.state.pc);
+    pub fn run(&mut self) {
+        let instruction_byte: u8 = self.memory.read_byte(self.state.pc);
         let instruction_option: Option<Instruction> = Instruction::from_byte(instruction_byte);
 
         if let Some(instruction) = instruction_option {
-            let result: InstructionResult = self.execute_instruction(instruction, memory);
+            let result: InstructionResult = self.execute_instruction(instruction);
             println!("{:?}, cycles: {:?}, instruction length: {:?}", result.state, result.cycles, result.instruction_length);
             self.state = result.state;
             self.stats.total_cycles += result.cycles as usize;
@@ -89,16 +90,16 @@ impl CPU {
         }
     }
 
-    fn execute_instruction(&self, instruction: Instruction, memory: &mut Memory) -> InstructionResult {
+    fn execute_instruction(&mut self, instruction: Instruction) -> InstructionResult {
         match instruction.mnemonic {
             Mnemonic::NOP 
                 => evaluate_nop(&self.state),
             Mnemonic::LDA | Mnemonic::LDX | Mnemonic::LDY 
-                => evaluate_load(&self.state, memory, instruction.mnemonic, instruction.addressing_mode),
+                => evaluate_load(&self.state, &self.memory, instruction.mnemonic, instruction.addressing_mode),
             Mnemonic::STA | Mnemonic::STX | Mnemonic::STY 
-                => evaluate_store(&self.state, memory, instruction.mnemonic, instruction.addressing_mode),
+                => evaluate_store(&self.state, &mut self.memory, instruction.mnemonic, instruction.addressing_mode),
             Mnemonic::TAX | Mnemonic::TAY | Mnemonic::TSX | Mnemonic::TXA | Mnemonic::TXS | Mnemonic::TYA 
-                => evaluate_transfer(&self.state, memory, instruction.mnemonic, instruction.addressing_mode) 
+                => evaluate_transfer(&self.state, &mut self.memory, instruction.mnemonic, instruction.addressing_mode) 
         }
     }
 }

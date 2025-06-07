@@ -1,3 +1,4 @@
+#[derive(Debug, PartialEq)]
 pub struct Memory {
     data: [u8; 65536],
 }
