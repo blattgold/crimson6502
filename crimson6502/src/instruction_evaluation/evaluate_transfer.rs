@@ -91,10 +91,3 @@ pub fn evaluate_transfer(cpu: &mut CPU, mnemonic: Mnemonic, addressing_mode: Add
         addressing_mode.instruction_length()
     )
 }
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_evaluate_load() {
-    }
-}

@@ -6,7 +6,7 @@ pub enum Mnemonic {
     TAX, TAY, TSX, TXA, TXS, TYA
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum AddressingMode {
     Implied,
     Immediate,

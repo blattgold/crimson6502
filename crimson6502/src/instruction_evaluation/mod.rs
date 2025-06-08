@@ -5,3 +5,6 @@ pub mod evaluate_transfer;
 pub use types::InstructionResult;
 pub use evaluate_other::*;
 pub use evaluate_transfer::*;
+
+#[cfg(test)]
+mod instruction_evaluation_tests;

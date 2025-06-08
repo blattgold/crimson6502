@@ -10,3 +10,6 @@ path = "src/lib.rs"
 lto = true
 codegen-units = 1
 opt_level = "3"
+
+[dependencies]
+rand = "0.9"

@@ -63,7 +63,7 @@ impl CPU {
 
     /// emulates 6502 reset procedure
     pub fn init_state(&mut self) {
-        self.state.pc = 0x1000u16;
+        self.state = CPUState::new();
         // TODO set stack pointer
     }
 
@@ -84,6 +84,7 @@ impl CPU {
         self.page_crossed
     }
 
+    /// writes one byte to memory at given address
     pub fn write_byte(&mut self, addr: u16, value: u8) {
         self.memory.write_byte(addr, value);
     }
@@ -125,13 +126,17 @@ impl CPU {
         fetched_word
     }
 
+    /// run a single instruction cycle
     pub fn run(&mut self) {
         let instruction_byte: u8 = self.fetch_byte();
         let instruction_option: Option<Instruction> = Instruction::from_byte(instruction_byte);
 
         if let Some(instruction) = instruction_option {
             let result: InstructionResult = self.execute_instruction(instruction);
+
+            #[cfg(debug_assertions)]
             println!("{:?}, cycles: {:?}, instruction length: {:?}", result.state, result.cycles, result.instruction_length);
+
             self.state = result.state;
             self.stats.total_cycles += result.cycles as usize;
             self.stats.instructions += 1;
@@ -153,18 +158,26 @@ impl CPU {
         }
     }
 
+    /// resolves an addressing mode to the effective address.
+    /// increments PC appropriately and also updates page_crossed boolean.
+    /// writes given value at computed effective address.
     pub fn resolve_address_and_set_value(&mut self, addressing_mode: AddressingMode, value: u8) {
         let addr: u16 = self.resolve_address(addressing_mode);
         self.memory.write_byte(addr, value);
     }
 
+    /// resolves an addressing mode to the effective address.
+    /// increments PC appropriately and also updates page_crossed boolean.
+    /// returns value at computed effective address.
     pub fn resolve_address_and_get_value(&mut self, addressing_mode: AddressingMode) -> u8 {
         let addr: u16 = self.resolve_address(addressing_mode);
         let value: u8 = self.read_byte(addr);
         value
     }
 
-    pub fn resolve_address(&mut self, addressing_mode: AddressingMode) -> u16 {
+    /// resolves an addressing mode to the effective address.
+    /// increments PC appropriately and also updates page_crossed boolean.
+    fn resolve_address(&mut self, addressing_mode: AddressingMode) -> u16 {
             match addressing_mode {
                 AddressingMode::Immediate => self.fetch_operand_address(),
                 AddressingMode::ZeroPage | AddressingMode::ZeroPageX | AddressingMode::ZeroPageY => {
