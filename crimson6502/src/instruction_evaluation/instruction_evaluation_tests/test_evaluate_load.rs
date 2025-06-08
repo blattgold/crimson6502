@@ -69,7 +69,6 @@ pub fn test_load_zeropage_helper(mnemonic: Mnemonic, expected_value: u8, addr: u
     };
     expected_state.sr = transfer_flags_helper(expected_value);
     expected_state.pc = 1;
-    println!("{:?}", cpu);
 
     assert_eq!(
         evaluate_load(&mut cpu, mnemonic, addressing_mode),
@@ -109,7 +108,6 @@ pub fn test_load_absolute_helper(mnemonic: Mnemonic, expected_value: u8, addr: u
     };
     expected_state.sr = transfer_flags_helper(expected_value);
     expected_state.pc = 2;
-    println!("{:?}", cpu);
 
     assert_eq!(
         evaluate_load(&mut cpu, mnemonic, addressing_mode),
