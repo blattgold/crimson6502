@@ -103,6 +103,15 @@ impl CPU {
         read_word
     }
 
+    /// reads one word from zero-page memory (little endian) starting at addr.
+    /// wraps zero page
+    pub fn read_word_zp(&self, addr: u8) -> u16 {
+        let lo: u8 = self.memory.read_byte(addr as u16);
+        let hi: u8 = self.memory.read_byte((addr.wrapping_add(1)) as u16);
+        let read_word: u16 = bytes_to_word(lo, hi);
+        read_word
+    }
+
     /// fetches pc and then increments it
     pub fn fetch_operand_address(&mut self) -> u16 {
         let fetched_operand_address: u16 = self.state.pc;
